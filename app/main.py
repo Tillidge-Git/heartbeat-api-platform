@@ -1,6 +1,4 @@
-from flask import Flask, jsonify, request
-import json
-
+from flask import Flask, jsonify, request 
 import json
 import logging
 import sys
@@ -32,7 +30,7 @@ def log(level, event, reason=None, **context):
         context["reason"] = reason
     logger.log(getattr(logging, level), event, extra={"context": context})
 
-    
+
 def create_app():
     app = Flask(__name__)
     @app.get("/health")
