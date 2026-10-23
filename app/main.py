@@ -3,7 +3,11 @@ import json
 import logging
 import sys
 from datetime import datetime, timezone
+import boto3
+from botocore.exceptions import ClientError 
 
+
+table = boto3.resource("dynamodb").Table("heartbeat")
 
 class JsonFormatter(logging.Formatter):
     def format(self, record):
@@ -29,6 +33,21 @@ def log(level, event, reason=None, **context):
     if reason is not None:
         context["reason"] = reason
     logger.log(getattr(logging, level), event, extra={"context": context})
+
+def save_ping_to_dynamodb(table,machine_id, seq, now):
+    try:
+        table.put_item(
+        Item={"machine_id": machine_id, "last_seq": seq, "last_seen": now},
+        ConditionExpression="attribute_not_exists(machine_id) OR last_seq < :seq",
+        ExpressionAttributeValues={":seq": seq},
+        )
+        log("INFO", "ping_saved", machine_id=machine_id, seq=seq, last_seen=now)
+        return "accepted"
+    except ClientError as e:#
+            if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
+                log("INFO", "duplicate_ping", reason="Duplicate or out-of-order ping", machine_id=machine_id, seq=seq)
+                return "duplicate"
+            raise
 
 
 def create_app():
@@ -62,6 +81,17 @@ def create_app():
             return jsonify({"ERROR": "Missing or invalid 'seq' field"}), 400
         
         log("INFO", "ping_accepted", machine_id=machine_id, seq=seq, )
-        return jsonify({"status": "accepted", "machine_id": machine_id, "seq": seq}), 200
-
+        now = datetime.now(timezone.utc).isoformat()
+        try:
+            result = save_ping_to_dynamodb(table, machine_id, seq, now)
+        except ClientError as e:
+                log("ERROR", "dynamodb_error", reason=e.response["Error"]["Message"], machine_id=machine_id, seq=seq,
+                    error_code=e.response["Error"]["Code"],)
+                return jsonify({"ERROR": "Internal server error"}), 500
+        if result == "accepted":
+                return jsonify({"status": "accepted"}), 200
+        elif result == "duplicate":
+                return jsonify({"status": "duplicate"}), 200
+        
     return app
+
