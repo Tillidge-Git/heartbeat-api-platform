@@ -7,7 +7,6 @@ import boto3
 from botocore.exceptions import ClientError 
 
 
-table = boto3.resource("dynamodb").Table("heartbeat")
 
 class JsonFormatter(logging.Formatter):
     def format(self, record):
@@ -43,6 +42,7 @@ def save_ping_to_dynamodb(table,machine_id, seq, now):
         )
         log("INFO", "ping_saved", machine_id=machine_id, seq=seq, last_seen=now)
         return "accepted"
+    
     except ClientError as e:#
             if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
                 log("INFO", "duplicate_ping", reason="Duplicate or out-of-order ping", machine_id=machine_id, seq=seq)
@@ -50,7 +50,9 @@ def save_ping_to_dynamodb(table,machine_id, seq, now):
             raise
 
 
-def create_app():
+def create_app(table=None):
+    if table is None:
+        table = boto3.resource("dynamodb").Table("heartbeat")
     app = Flask(__name__)
     @app.get("/health")
     def health_check():
