@@ -9,12 +9,12 @@ terraform {
   }
 
   backend "s3" {
-  bucket         = "heartbeat-tfstate-109169735495"
-  key            = "bootstrap/terraform.tfstate"
-  region         = "eu-west-2"
-  encrypt        = true
-  use_lockfile  = true
-  } 
+    bucket       = "heartbeat-tfstate-109169735495"
+    key          = "bootstrap/terraform.tfstate"
+    region       = "eu-west-2"
+    encrypt      = true
+    use_lockfile = true
+  }
 }
 
 provider "aws" {
