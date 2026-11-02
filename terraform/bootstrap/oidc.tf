@@ -111,14 +111,14 @@ resource "aws_iam_role_policy" "apply_state_access" {
         Sid      = "Readwritestate"
         Effect   = "Allow"
         Action   = ["s3:GetObject", "s3:PutObject"]
-        Resource = "${aws_s3_bucket.state_bucket.arn}/main/*"
+        Resource = "${aws_s3_bucket.state_bucket.arn}/platform/*"
       },
 
       {
         Sid      = "ManageLockFiles"
         Effect   = "Allow"
         Action   = ["s3:PutObject", "s3:DeleteObject"]
-        Resource = "${aws_s3_bucket.state_bucket.arn}/main/*.tflock"
+        Resource = "${aws_s3_bucket.state_bucket.arn}/platform/*.tflock"
       }
     ]
   })
