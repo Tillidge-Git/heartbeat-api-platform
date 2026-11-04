@@ -81,7 +81,7 @@ resource "aws_iam_role" "oidc_apply_role" {
         Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-            "token.actions.githubusercontent.com:sub" = "repo:Tillidge-Git/heartbeat-api-platform:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:sub" = "repo:Tillidge-Git/heartbeat-api-platform:environment:production"
           }
         }
       }
