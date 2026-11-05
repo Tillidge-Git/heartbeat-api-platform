@@ -8,6 +8,30 @@ data "aws_route53_zone" "main" {
   name = "tillidge-heartbeat.click"
 }
 
+resource "aws_iam_policy" "state_kms_decrypt" {
+  name        = "ci-heartbeat-state-kms-decrypt"
+  description = "Policy to allow decryption of the KMS key used for the Terraform state bucket"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt", "kms:GenerateDataKey"]
+        Resource = aws_kms_key.state_bucket_kms.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "plan_state_kms" {
+  policy_arn = aws_iam_policy.state_kms_decrypt.arn
+  role       = aws_iam_role.oidc_plan_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "apply_state_kms" {
+  policy_arn = aws_iam_policy.state_kms_decrypt.arn
+  role       = aws_iam_role.oidc_apply_role.name
+}
 
 resource "aws_iam_role" "oidc_plan_role" {
   name = "ci-heartbeat-oidc-plan-role"
@@ -94,6 +118,8 @@ resource "aws_iam_role_policy_attachment" "apply_read_only" {
   role       = aws_iam_role.oidc_apply_role.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
+
+
 
 resource "aws_iam_role_policy" "apply_state_access" {
   name = "ci-heartbeat-apply-state-access"
