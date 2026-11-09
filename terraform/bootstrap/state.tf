@@ -15,7 +15,36 @@ resource "aws_kms_key" "state_bucket_kms" {
   description             = "KMS key for encrypting the S3 bucket for Terraform state"
   enable_key_rotation     = true
   deletion_window_in_days = 30
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "EnableIAMAdminAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowCIRoles"
+        Effect = "Allow"
+        Principal = {
+          AWS = [
+            aws_iam_role.oidc_apply_role.arn,
+            aws_iam_role.oidc_plan_role.arn
+          ]
+        }
+        Action   = ["kms:Decrypt", "kms:GenerateDataKey"]
+        Resource = "*"
+      }
+    ]
+
+  })
 }
+
 
 resource "aws_kms_alias" "state_bucket_key" {
   name          = "alias/heartbeat-tfstate-key"
