@@ -11,6 +11,7 @@ terraform {
   backend "s3" {
     bucket       = "heartbeat-tfstate-109169735495"
     key          = "bootstrap/terraform.tfstate"
+    kms_key_id   = "arn:aws:kms:eu-west-2:109169735495:key/7b78d188-9b4b-4cff-9498-a899b6ab7c01"
     region       = "eu-west-2"
     encrypt      = true
     use_lockfile = true
