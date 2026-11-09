@@ -23,7 +23,7 @@ resource "aws_iam_role" "oidc_plan_role" {
         Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-            "token.actions.githubusercontent.com:sub" = "repo:Tillidge-Git/heartbeat-api-platform:pull_request"
+            "token.actions.githubusercontent.com:sub" = "repo:Tillidge-Git@300422411/heartbeat-api-platform@1421081506:pull_request"
           }
         }
       }
@@ -81,7 +81,7 @@ resource "aws_iam_role" "oidc_apply_role" {
         Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-            "token.actions.githubusercontent.com:sub" = "repo:Tillidge-Git/heartbeat-api-platform:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:sub" = "repo:Tillidge-Git@300422411/heartbeat-api-platform@1421081506:environment:production"
           }
         }
       }
@@ -94,6 +94,8 @@ resource "aws_iam_role_policy_attachment" "apply_read_only" {
   role       = aws_iam_role.oidc_apply_role.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
+
+
 
 resource "aws_iam_role_policy" "apply_state_access" {
   name = "ci-heartbeat-apply-state-access"
