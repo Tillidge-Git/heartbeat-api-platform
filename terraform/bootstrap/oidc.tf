@@ -24,7 +24,7 @@ resource "aws_iam_role" "oidc_plan_role" {
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
             "token.actions.githubusercontent.com:sub" = ["repo:Tillidge-Git@300422411/heartbeat-api-platform@1421081506:pull_request",
-                                                        "repo:Tillidge-Git@300422411/heartbeat-api-platform@1421081506:ref:refs/heads/main"]
+            "repo:Tillidge-Git@300422411/heartbeat-api-platform@1421081506:ref:refs/heads/main"]
           }
         }
       }
