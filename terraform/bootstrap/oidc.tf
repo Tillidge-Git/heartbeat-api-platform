@@ -66,6 +66,48 @@ resource "aws_iam_role_policy" "plan_state_access" {
     ]
   })
 }
+###################
+
+
+resource "aws_iam_role" "oidc_app_package_deployment_role" {
+  name = "ci-heartbeat-oidc-package-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = data.aws_iam_openid_connect_provider.github.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+            "token.actions.githubusercontent.com:sub" = "repo:Tillidge-Git@300422411/heartbeat-api-platform@1421081506:ref:refs/heads/main",
+
+          }
+        }
+      }
+    ]
+  })
+
+}
+
+resource "aws_iam_role_policy" "app_package_access" {
+  name = "ci-package-deployment-role"
+  role = aws_iam_role.oidc_app_package_deployment_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "PutPackage"
+        Effect   = "Allow"
+        Action   = "s3:PutObject"
+        Resource = "${aws_s3_bucket.app_package_bucket.arn}/*"
+      },
+    ]
+  })
+}
 
 ###################
 
@@ -209,7 +251,7 @@ resource "aws_iam_role_policy" "apply_infra_access" {
         Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/heartbeat*"
         Condition = {
           StringEquals = {
-            "iam:PassedToService" = ["ec2.amazonaws.com", "lambda.amazonaws.com"]
+            "iam:PassedToService" = ["ec2.amazonaws.com", "lambda.amazonaws.com", "vpc-flow-logs.amazonaws.com"]
           }
         }
 
