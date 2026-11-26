@@ -1,4 +1,7 @@
 resource "aws_iam_policy" "iam_boundary" {
+  #checkov:skip=CKV_AWS_355:Session Manager actions mirror AmazonSSMManagedInstanceCore and can't be resource-scoped; boundary is a ceiling, not a grant; to be narrowed from CloudTrail.
+  #checkov:skip=CKV_AWS_290:Session Manager actions mirror AmazonSSMManagedInstanceCore and can't be resource-scoped; boundary is a ceiling, not a grant; to be narrowed from CloudTrail.
+
   name = "iam-role-boundary-policy"
   policy = jsonencode({
     Version = "2012-10-17"

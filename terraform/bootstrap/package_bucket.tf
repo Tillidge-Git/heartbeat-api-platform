@@ -1,4 +1,8 @@
 resource "aws_s3_bucket" "app_package_bucket" {
+  #checkov:skip=CKV2_AWS_62:Notifications left out as nothing to consume notifications.
+  #checkov:skip=CKV_AWS_144:CRR not required as architecture is single region, versioning and lifecycle rules are enabled to cover package recovery and retention requirements.
+  #checkov:skip=CKV_AWS_18:Access is already restricted to two CI roles, plus admin and cloudtrail logs api access.
+  #checkov:skip=CKV_AWS_145:Package holds no secrets so decision was made AES256 was sufficient 
   bucket = "heartbeat-app-package-109169735495"
   lifecycle { prevent_destroy = true }
 
